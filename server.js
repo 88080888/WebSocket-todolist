@@ -1,16 +1,19 @@
 const express = require('express');
+const path = require("path");
 const socket = require('socket.io');
 
 const app = express();
 
-const tasks = [];
+let tasks = [];
 
-const server = app.listen(8000, () => {
-  console.log('Server is running on port: 8000');
+app.use(express.static(path.join(__dirname, '/client')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname + '/client/src/index.js'));
 });
 
-app.use((req, res) => {
-  res.status(404).send({ message: 'Not found...' });
+const server = app.listen(process.env.PORT || 8000, () => {
+  console.log('Server is running...');
 });
 
 const io = socket(server);
@@ -24,7 +27,11 @@ io.on('connection', (socket) => {
   });
 
   socket.on('removeTask', (removedTask) => {
-    tasks.filter(task => {return task.id != removedTask.id})
+    tasks.filter(task => {return task.id !== removedTask.id})
     socket.broadcast.emit('removeTask', removedTask);
   });
+});
+
+app.use((req, res) => {
+  res.status(404).send('404 not found...');
 });
