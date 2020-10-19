@@ -22,17 +22,15 @@ class App extends React.Component {
     });
   }
 
-  removeTask(task, source) {
+  removeTask(task) {
     const {tasks} = this.state;
     this.setState({ tasks: tasks.filter(element => {return element.id !== task.id })});
 
-    if(source !== undefined) {
-      this.socket.emit('removeTask', task);
-    }
+    this.socket.emit('removeTask', task);
   }
 
-  submitForm(e) {
-    e.preventDefault();
+  submitForm(event) {
+    event.preventDefault();
     const id = uuidv4();
     this.addTask({id: id, name: this.state.taskName});
     this.socket.emit('addTask', ({id: id, name: this.state.taskName}));
@@ -62,14 +60,14 @@ class App extends React.Component {
           <ul className="tasks-section__list" id="tasks-list">
             {tasks.map(task => (
                 <li key={task.id}> {task.name}
-                  <button class="btn btn--red" onClick={(event) => this.removeTask(task)}>Remove</button>
+                  <button className="btn btn--red" onClick={() => this.removeTask(task)}>Remove</button>
                 </li>
             ))}
           </ul>
     
           <form id="add-task-form">
-            <input className="text-input" autocomplete="off" type="text" placeholder="Type your description" id="task-name" value={taskName} onChange={(e) => {this.setState({taskName: e.target.value})}}/>
-            <button className="btn" type="submit" onClick={(e) => this.submitForm(e)}>Add</button>
+            <input className="text-input" autoComplete="off" type="text" placeholder="Type your description" id="task-name" value={taskName} onChange={(e) => {this.setState({taskName: e.target.value})}}/>
+            <button className="btn" type="submit" onClick={(event) => this.submitForm(event)}>Add</button>
           </form>
     
         </section>

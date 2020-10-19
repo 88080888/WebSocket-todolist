@@ -1,16 +1,15 @@
 const express = require('express');
-const path = require("path");
 const socket = require('socket.io');
+const path = require('path');
 
 const app = express();
 
-let tasks = [];
+let tasks = [
+  { id: 1, name: 'Shopping' }, 
+  { id: 2, name: 'Go out with a dog' }
+];
 
 app.use(express.static(path.join(__dirname, '/client')));
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname + '/client/src/index.js'));
-});
 
 const server = app.listen(process.env.PORT || 8000, () => {
   console.log('Server is running...');
@@ -19,15 +18,19 @@ const server = app.listen(process.env.PORT || 8000, () => {
 const io = socket(server);
 
 io.on('connection', (socket) => {
-  socket.emit('updateData', tasks);
 
-  socket.on('addTask', (newTask) => {
-    tasks.push(newTask);
-    socket.broadcast.emit('addTask', newTask);
+  socket.emit('updateData', tasks);
+  console.log('all tasks: ', tasks);
+
+  socket.on('addTask', (task) => {
+    console.log('New task added: ',  task);
+    tasks.push(task);
+    socket.broadcast.emit('addTask', task);
   });
 
   socket.on('removeTask', (removedTask) => {
-    tasks.filter(task => {return task.id !== removedTask.id})
+    console.log('Task with index ',  removedTask, ' removed');
+    tasks = tasks.filter(task => {return task.id !== removedTask.id})
     socket.broadcast.emit('removeTask', removedTask);
   });
 });
